@@ -91,15 +91,15 @@ def avg_Temp(V):
             else:
                 Vnew = .25*(V[i-1,j]+V[i+1,j]+V[i,j-1]+V[i,j+1])
                 Vrlx[i,j]=Vnew
-    circle_fill(V,R,T_FLUID)
+    Vrlx = circle_fill(Vrlx,R,T_FLUID)
     return Vrlx
 
 ANWSER = 42
 length = 1000
 height = 1000
 R = 16.0 # radius (mm)
-T_ICE = ctok(-40.0) #Kelvin
-T_FLUID = ctok(500.0) #Kelvin
+T_ICE = -40.0 #c
+T_FLUID = 500.0 #c
 
 
 T = np.zeros((height, length))
@@ -117,11 +117,15 @@ t=0
 while t<=5000:
     T = avg_Temp(T)
     t+=1
-    if (t % 10) == 0:
-        # print(t, T, sep=",")
-        f = "out"
-        f += str(t)
-        np.save(f, T)
+    print t
+
+
+
+    # if (t % 10) == 0:
+    #     # print(t, T, sep=",")
+    #     f = "out"
+    #     f += str(t)
+    #     np.save(f, T)
 
 
 
@@ -135,7 +139,7 @@ y = height/2.0
 
 circle1 = plt.Circle((x, y), 16.0, color='r')
 
-
+'''
 
 
 
@@ -149,13 +153,12 @@ x = np.arange(0, length, delta)
 y = np.arange(0, height, delta)
 X, Y = np.meshgrid(x, y)
 
-fig2, ax = plt.subplots()
-ax.add_artist(circle1)
+fig2 = plt.figure()
+# ax.add_artist(circle1)
 cp1 = plt.contourf(X, Y, T, 25)
 plt.title('Contour Plot of Tempeture in ice')
 plt.xlabel('x (mm)')
 plt.ylabel('y (mm)')
 plt.colorbar(cp1)
 # plt.legend()
-plt.show()
-'''
+plt.savefig('thermo.png')
