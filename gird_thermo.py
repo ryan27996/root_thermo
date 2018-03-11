@@ -114,10 +114,14 @@ T[:, -1] = T_ICE
 T = circle_fill(T,R,T_FLUID)
 
 t=0
-while t<=500:
+while t<=5000:
     T = avg_Temp(T)
     t+=1
-    print(t)
+    if (t % 10) == 0:
+        # print(t, T, sep=",")
+        f = "out"
+        f += str(t)
+        np.save(f, T)
 
 
 
@@ -127,7 +131,7 @@ while t<=500:
 x = length/2.0
 y = height/2.0
 
-
+'''
 
 circle1 = plt.Circle((x, y), 16.0, color='r')
 
@@ -154,3 +158,4 @@ plt.ylabel('y (mm)')
 plt.colorbar(cp1)
 # plt.legend()
 plt.show()
+'''
