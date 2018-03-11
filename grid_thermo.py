@@ -117,48 +117,65 @@ t=0
 while t<=5000:
     T = avg_Temp(T)
     t+=1
-    print t
+    # print t
 
 
 
-    # if (t % 10) == 0:
-    #     # print(t, T, sep=",")
-    #     f = "out"
-    #     f += str(t)
-    #     np.save(f, T)
+    if (t % 10) == 0:
+        # print(t, T, sep=",")
+        f = "out"
+        f += str(t)
+        f += ".png"
+        x = length/2.0
+        y = height/2.0
+
+        delta = 1.0
+        x = np.arange(0, length, delta)
+        y = np.arange(0, height, delta)
+        X, Y = np.meshgrid(x, y)
+
+        fig2 = plt.figure()
+        # ax.add_artist(circle1)
+        cp1 = plt.contourf(X, Y, T, 25)
+        plt.title('Contour Plot of Tempeture in ice')
+        plt.xlabel('x (mm)')
+        plt.ylabel('y (mm)')
+        plt.colorbar(cp1)
+        # plt.legend()
+        plt.savefig(f)
 
 
 
 
 
 
-x = length/2.0
-y = height/2.0
-
-'''
-
-circle1 = plt.Circle((x, y), 16.0, color='r')
-
-'''
-
-
-
-
-
-
-# T = np.flipud(T)
-
-delta = 1.0
-x = np.arange(0, length, delta)
-y = np.arange(0, height, delta)
-X, Y = np.meshgrid(x, y)
-
-fig2 = plt.figure()
-# ax.add_artist(circle1)
-cp1 = plt.contourf(X, Y, T, 25)
-plt.title('Contour Plot of Tempeture in ice')
-plt.xlabel('x (mm)')
-plt.ylabel('y (mm)')
-plt.colorbar(cp1)
-# plt.legend()
-plt.savefig('thermo.png')
+# x = length/2.0
+# y = height/2.0
+#
+# '''
+#
+# circle1 = plt.Circle((x, y), 16.0, color='r')
+#
+# '''
+#
+#
+#
+#
+#
+#
+# # T = np.flipud(T)
+#
+# delta = 1.0
+# x = np.arange(0, length, delta)
+# y = np.arange(0, height, delta)
+# X, Y = np.meshgrid(x, y)
+#
+# fig2 = plt.figure()
+# # ax.add_artist(circle1)
+# cp1 = plt.contourf(X, Y, T, 25)
+# plt.title('Contour Plot of Tempeture in ice')
+# plt.xlabel('x (mm)')
+# plt.ylabel('y (mm)')
+# plt.colorbar(cp1)
+# # plt.legend()
+# plt.savefig('thermo.png')
