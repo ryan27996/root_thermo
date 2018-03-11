@@ -9,7 +9,7 @@ from matplotlib.patches import Circle
 
 # Kelvin to Celsius
 def ktoc(temp):
-    return temp + 273.15
+    return temp - 273.15
 
 
 # Celsius to Kelvin
