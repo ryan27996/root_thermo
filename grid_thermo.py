@@ -1,7 +1,10 @@
 #!/usr/bin/python
 
 import pdb
+import argparse
 import numpy as np
+# import matplotlib  # For headless servers w/o x-org
+# matplotlib.user('Agg')  # For headless servers w/o x-org
 import matplotlib.pyplot as plt
 import random
 from matplotlib.patches import Circle
@@ -117,12 +120,28 @@ def getMeltRadius(array, length, melt_temp):
     return r2
 
 
+#  Example
+#   ./grid_thermo.py -l 100 -m 0 -i -40 -c 500 -r 1.6
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--length", "-l", type=int, required=True)
+parser.add_argument("--melttemp", "-m", type=float, required=True)
+parser.add_argument("--icetemp", "-i", type=float, required=True)
+parser.add_argument("--coretemp", "-c", type=float, required=True)
+parser.add_argument("--radius", "-r", type=float, required=True)
+args = parser.parse_args()
+
 ANWSER = 42
-length = 100
+#  length = 100
+length = args.length
 height = length
-R = 1.6  # radius (cm)
-T_ICE = -40.0  # c
-T_FLUID = 500.0  # c
+#  R = 1.6  # radius (cm)
+R = args.radius
+# T_ICE = -40.0  # c
+T_ICE = args.icetemp
+# T_FLUID = 500.0  # c
+T_FLUID = args.coretemp
+T_MELT = args.melttemp
 
 
 T = np.zeros((height, length))
@@ -144,7 +163,7 @@ while t <= 5000:
 
     if (t % 10) == 0:
         # print(t, T, sep=",")
-        r = getMeltRadius(T, length, 20)  # Array, Length, Melt_temp
+        r = getMeltRadius(T, length, T_MELT)  # Array, Length, Melt_temp
         f = "out-"
         f += str(t).zfill(6)
         f += "-"
