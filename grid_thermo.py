@@ -121,7 +121,7 @@ def getMeltRadius(array, length, melt_temp):
 
 
 #  Example
-#   ./grid_thermo.py -l 100 -m 0 -i -40 -c 500 -r 1.6
+#   ./grid_thermo.py -l 100 -m 0 -i -40 -c 500 -r 1.6 -n 1000
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--length", "-l", type=int, required=True)
@@ -129,6 +129,7 @@ parser.add_argument("--melttemp", "-m", type=float, required=True)
 parser.add_argument("--icetemp", "-i", type=float, required=True)
 parser.add_argument("--coretemp", "-c", type=float, required=True)
 parser.add_argument("--radius", "-r", type=float, required=True)
+parser.add_argument("--iterations", "-n", type=int, required=True)
 args = parser.parse_args()
 
 ANWSER = 42
@@ -142,6 +143,7 @@ T_ICE = args.icetemp
 # T_FLUID = 500.0  # c
 T_FLUID = args.coretemp
 T_MELT = args.melttemp
+ITERATIONS = args.iterations
 
 
 T = np.zeros((height, length))
@@ -156,7 +158,7 @@ T[:, -1] = T_ICE
 T = circle_fill(T, R, T_FLUID)
 
 t = 0
-while t <= 5000:
+while t <= ITERATIONS:
     T = avg_Temp(T)
     t += 1
     # print t
