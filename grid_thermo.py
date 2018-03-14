@@ -1,7 +1,10 @@
 #!/usr/bin/python
 
 import pdb
+import argparse
 import numpy as np
+# import matplotlib  # For headless servers w/o x-org
+# matplotlib.user('Agg')  # For headless servers w/o x-org
 import matplotlib.pyplot as plt
 import random
 from matplotlib.patches import Circle
@@ -53,25 +56,27 @@ def circler(array, radius, center_x, center_y, temperature):
 
     return a
 
+
 def circle_fill(a, radius, temp):
-    for i in np.arange(0,int(radius+1),1):
+    for i in np.arange(0, int(radius+1), 1):
         a = circler(a, i, int(height/2), int(height/2), temp)
     return a
+
 
 def test_circler():
     SIZE = 100
     a = np.zeros((SIZE, SIZE))
     a = circler(a, 5, int(SIZE/2), int(SIZE/2), 10)
-    for i in np.arange(0,6,1):
+    for i in np.arange(0, 6, 1):
         a = circler(a, i, int(SIZE/2), int(SIZE/2), 10)
 
-    #plot circle
+    # plot circle
     delta = 1.0
     x = np.arange(0, 100.0, delta)
     y = np.arange(0, 100.0, delta)
     X, Y = np.meshgrid(x, y)
-    fig2 = plt.figure()
-    cp1 = plt.contourf(X, Y, a, 2)
+    plt.figure()
+    plt.contourf(X, Y, a, 2)
     plt.xlabel('x (mm)')
     plt.ylabel('y (mm)')
     plt.show()
@@ -80,26 +85,65 @@ def test_circler():
 # test_circler()
 
 
+def lim_cir(r, center_x, center_y):
+    circle2 = plt.Circle((center_x, center_y), r, color='r', fill=False, linewidth = 2.0)
+    ax = plt.gca()
+    ax.add_artist(circle2)
 
 
 def avg_Temp(V):
-    Vrlx=np.zeros((height, length))
+    Vrlx = np.zeros((height, length))
     for i in range(height):
         for j in range(length):
-            if i == 0 or i == height-1 or j == 0 or j ==length-1:
-                Vrlx[i,j]=V[i,j]
+            if i == 0 or i == height-1 or j == 0 or j == length-1:
+                Vrlx[i, j] = V[i, j]
             else:
-                Vnew = .25*(V[i-1,j]+V[i+1,j]+V[i,j-1]+V[i,j+1])
-                Vrlx[i,j]=Vnew
-    Vrlx = circle_fill(Vrlx,R,T_FLUID)
+                Vnew = .25*(V[i-1, j]+V[i+1, j]+V[i, j-1]+V[i, j+1])
+                Vrlx[i, j] = Vnew
+    Vrlx = circle_fill(Vrlx, R, T_FLUID)
     return Vrlx
 
+
+def getMeltRadius(array, length, melt_temp):
+    x = int(length / 2)
+    # r1 = 0
+    r2 = 0
+    # for y in range(x, 0, -1):
+    #     if array[x, y] <= melt_temp:
+    #         r1 = y
+    #         break
+    for y in range(0, length - 1):
+        if array[x, y] > melt_temp:
+            r2 = x - y
+            break
+    # print(r1, r2)
+    return r2
+
+
+#  Example
+#   ./grid_thermo.py -l 100 -m 0 -i -40 -c 500 -r 1.6 -n 1000
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--length", "-l", type=int, required=True)
+parser.add_argument("--melttemp", "-m", type=float, required=True)
+parser.add_argument("--icetemp", "-i", type=float, required=True)
+parser.add_argument("--coretemp", "-c", type=float, required=True)
+parser.add_argument("--radius", "-r", type=float, required=True)
+parser.add_argument("--iterations", "-n", type=int, required=True)
+args = parser.parse_args()
+
 ANWSER = 42
-length = 1000
-height = 1000
-R = 16.0 # radius (mm)
-T_ICE = -40.0 #c
-T_FLUID = 500.0 #c
+#  length = 100
+length = args.length
+height = length
+#  R = 1.6  # radius (cm)
+R = args.radius
+# T_ICE = -40.0  # c
+T_ICE = args.icetemp
+# T_FLUID = 500.0  # c
+T_FLUID = args.coretemp
+T_MELT = args.melttemp
+ITERATIONS = args.iterations
 
 
 T = np.zeros((height, length))
@@ -111,42 +155,42 @@ T[0, :] = T_ICE
 T[-1, :] = T_ICE
 T[:, 0] = T_ICE
 T[:, -1] = T_ICE
-T = circle_fill(T,R,T_FLUID)
+T = circle_fill(T, R, T_FLUID)
 
-t=0
-while t<=5000:
+t = 0
+while t <= ITERATIONS:
     T = avg_Temp(T)
-    t+=1
+    t += 1
     # print t
-
-
 
     if (t % 10) == 0:
         # print(t, T, sep=",")
-        f = "out"
-        f += str(t)
+        r = getMeltRadius(T, length, T_MELT)  # Array, Length, Melt_temp
+        f = "out-"
+        f += str(t).zfill(6)
+        f += "-"
+        f += str(r)
         f += ".png"
         x = length/2.0
         y = height/2.0
 
+        lim_cir(r, x, y)
         delta = 1.0
         x = np.arange(0, length, delta)
         y = np.arange(0, height, delta)
         X, Y = np.meshgrid(x, y)
-
         fig2 = plt.figure()
-        # ax.add_artist(circle1)
+        circle2 = plt.Circle((length/2.0, height/2.0), r, color='r', fill=False, linewidth = 2.0)
+        ax = plt.gca()
+        ax.add_artist(circle2)
         cp1 = plt.contourf(X, Y, T, 25)
         plt.title('Contour Plot of Tempeture in ice')
-        plt.xlabel('x (mm)')
-        plt.ylabel('y (mm)')
+        plt.xlabel('x (cm)')
+        plt.ylabel('y (cm)')
         plt.colorbar(cp1)
         # plt.legend()
         plt.savefig(f)
-
-
-
-
+        plt.close()
 
 
 # x = length/2.0
