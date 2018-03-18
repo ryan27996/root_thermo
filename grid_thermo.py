@@ -98,7 +98,7 @@ def avg_Temp(V):
             if i == 0 or i == height-1 or j == 0 or j == length-1:
                 Vrlx[i, j] = V[i, j]
             else:
-                Vnew = .25*(V[i-1, j]+V[i+1, j]+V[i, j-1]+V[i, j+1])
+                Vnew = .25*(Vrlx[i-1, j]+V[i+1, j]+Vrlx[i, j-1]+V[i, j+1])
                 Vrlx[i, j] = Vnew
     Vrlx = circle_fill(Vrlx, R, T_FLUID)
     return Vrlx
@@ -131,6 +131,34 @@ parser.add_argument("--coretemp", "-c", type=float, required=True)
 parser.add_argument("--radius", "-r", type=float, required=True)
 parser.add_argument("--iterations", "-n", type=int, required=True)
 args = parser.parse_args()
+
+
+# waterDiffusivity returns the diffusivity of water at a given temperature
+# it is accurate between 0 < t < 550 degC
+def waterDiffusivity(t):
+
+    #  Diffusivity 10.1063/1.555718
+    TD_ICE = 0.1328E-6  # m^2/s Diffusivity T=0C P=0.5MPa
+    TD_VAP25 = 0.1456E-6  # m^2/s Diffusivity T=25 P=0.5MPa
+    TD_VAP150 = 0.1725E-6  # m^2/s Diffusivity T=150 P=0.5MPa
+    TD_VAP200 = 6.942E-6  # m^2/s Diffusivity T=200 P=0.5MPa
+    TD_VAP550 = 25.58E-6  # m^2/s Diffusivity T=550 P=0.5MPa
+
+    if t >= 0 and t < 25:
+        return (TD_ICE - TD_VAP25) / (0 - 25) * t + TD_ICE
+    if t >= 25 and t < 150:
+        return (TD_VAP25 - TD_VAP150) / (25 - 150) * (t - 25) + TD_VAP25
+    if t >= 150 and t < 200:
+        return (TD_VAP150 - TD_VAP200) / (150 - 200) * (t - 150) + TD_VAP150
+    if t >= 200 and t <= 550:
+        return (TD_VAP200 - TD_VAP550) / (200 - 550) * (t - 200) + TD_VAP200
+    if t < 0:
+        return TD_ICE
+        print("WARN: waterDiffusivity is wrong at temperature {0}".format(t))
+    if t > 550:
+        return (TD_VAP200 - TD_VAP550) / (200 - 550) * (t - 200) + TD_VAP200
+        print("WARN: waterDiffusivity is wrong at temperature {0}".format(t))
+
 
 ANWSER = 42
 #  length = 100
@@ -183,7 +211,7 @@ while t <= ITERATIONS:
         circle2 = plt.Circle((length/2.0, height/2.0), r, color='r', fill=False, linewidth = 2.0)
         ax = plt.gca()
         ax.add_artist(circle2)
-        cp1 = plt.contourf(X, Y, T, 25)
+        cp1 = plt.contourf(X, Y, T, 20)
         plt.title('Contour Plot of Tempeture in ice')
         plt.xlabel('x (cm)')
         plt.ylabel('y (cm)')
@@ -223,3 +251,80 @@ while t <= ITERATIONS:
 # plt.colorbar(cp1)
 # # plt.legend()
 # plt.savefig('thermo.png')
+'''
+class cell():
+    def __init__(self, temp, energy, k, statechanging=False):
+        self.t = temp
+        self.e = energy
+        self.k = k
+        self.sc = bool(statechanging)
+
+    def increaseTemp(temp):
+
+
+
+from matplotlib.animation import FuncAnimation
+
+class coffee():
+    keeps track of number of particles and their location
+    def __init__(self,numberOfParticles,xmin=-100,xmax=100,ymin=-100,ymax=100):
+        self.nParticles = numberOfParticles
+        self.x = np.zeros(numberOfParticles)
+        self.y = np.zeros(numberOfParticles)
+        self.xrange = [xmin,xmax]
+        self.yrange = [ymin,ymax]
+
+    def updatePostion(self):
+        for i in np.arange(self.nParticles):
+            self.x[i] = self.x[i] + random.uniform(-5,5)
+            self.y[i] = self.y[i] + random.uniform(-5,5)
+
+            if self.x[i] > self.xrange[1]:
+                self.x[i] = self.xrange[1]
+            if self.x[i] < self.xrange[0]:
+                self.x[i] = self.xrange[0]
+            if self.y[i] > self.yrange[1]:
+                self.y[i] = self.yrange[1]
+            if self.y[i] < self.yrange[0]:
+                self.y[i] = self.yrange[0]
+
+
+    # def plotDistribution(self):
+    #     plt.scatter(self.x,self.y)
+    #     plt.xlim(-100,100)
+    #     plt.ylim(-100,100)
+    #     plt.xlabel('x')
+    #     plt.ylabel('y')
+    #     plt.show()
+
+    def initFigure(self):
+        self.fig = plt.figure()
+        plt.xlim(-100,100)
+        plt.ylim(-100,100)
+        plt.xlabel('x')
+        plt.ylabel('y')
+        self.scat = plt.scatter(self.x,self.y,s=20)
+
+    def update(self,i):
+        self.updatePostion()
+        self.scat.set_offsets(np.c_[self.x,self.y])
+
+
+
+nParticles = 500
+newCup = coffee(nParticles)
+
+
+# t = 0
+# t_max = 60
+# while t < t_max:
+#     newCup.updatePostion()
+#     t += 1
+#     if t % 100 == 0:
+#         print t
+
+
+newCup.initFigure()
+anim = FuncAnimation(newCup.fig,newCup.update,interval=1,frames=10000,repeat = False) #fig is a figure, update is a function
+plt.show()
+'''
