@@ -46,3 +46,6 @@ flycheck_*.el
 
 # Ignore generated png files
 *.png
+
+# Atom Directory
+.ropeproject/
