@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.patches import Circle
 
 # plate size, mm
 w = h = 100.
@@ -7,8 +8,6 @@ w = h = 100.
 dx = dy = 0.1
 # Thermal diffusivity of steel, mm2.s-1
 D = 0.1328
-
-
 
 
 # waterDiffusivity returns the diffusivity of water at a given temperature
@@ -39,6 +38,7 @@ def waterDiffusivity(t):
 
 
 Tcool, Thot = -20, 500
+Tmelt = 0.0
 
 nx, ny = int(w/dx), int(h/dy)
 
@@ -58,22 +58,72 @@ for i in range(nx):
             u0[i, j] = Thot
 
 
+def getMeltRadius(array, length, melt_temp):
+    x = int(length / 2)
+    # r1 = 0
+    r2 = 0
+    # for y in range(x, 0, -1):
+    #     if array[x, y] <= melt_temp:
+    #         r1 = y
+    #         break
+    for y in range(0, length - 1):
+        if array[x, y] > melt_temp:
+            r2 = x - y
+            break
+    # print(r1, r2)
+    return r2
+
+
+
 def do_timestep(u0, u):
+
     # Propagate with forward-difference in time, central-difference in space
     u[1:-1, 1:-1] = u0[1:-1, 1:-1] + D * dt * (
           (u0[2:, 1:-1] - 2*u0[1:-1, 1:-1] + u0[:-2, 1:-1])/dx2
           + (u0[1:-1, 2:] - 2*u0[1:-1, 1:-1] + u0[1:-1, :-2])/dy2
           )
 
+    for i in range(nx):
+        for j in range(ny):
+            p2 = (i*dx-cx)**2 + (j*dy-cy)**2
+            if p2 < r2:
+                u[i, j] = Thot
     u0 = u.copy()
     return u0, u
 
 
 # Number of timesteps
-nsteps = 1001
+nsteps = 10001
 # Output 4 figures at these timesteps
-mfig = [0, int(nsteps/3), int(2*nsteps/3), nsteps - 1]
-fignum = 0
+# mfig = [0, int(nsteps/3), int(2*nsteps/3), nsteps - 1]
+# fignum = 0
+
+t=0
+while t <= nsteps:
+    u0, u = do_timestep(u0, u)
+    t+=1
+    # print(t)
+
+    if (t % 100) == 0:
+        # r = getMeltRadius(u, int(w), Tmelt)  # Array, Length, Melt_temp
+        # print(r)
+        x = np.arange(0, w, dx)
+        y = np.arange(0, h, dy)
+        X, Y = np.meshgrid(x, y)
+        fig2 = plt.figure()
+        # circle2 = plt.Circle((w/2, h/2), r, color='r', fill=False, linewidth = 2.0)
+        # ax = plt.gca()
+        # ax.add_artist(circle2)
+        cp1 = plt.contourf(X, Y, u.copy(), 20)
+
+        plt.title('Contour Plot of Tempeture in ice after t = {:.1f}s'.format(t*dt))
+        plt.xlabel('x (mm)')
+        plt.ylabel('y (mm)')
+        plt.colorbar(cp1)
+        plt.savefig("out-{0}.png".format(str(t).zfill(6)))
+        plt.close()
+
+'''
 fig = plt.figure()
 for m in range(nsteps):
     u0, u = do_timestep(u0, u)
@@ -89,3 +139,4 @@ cbar_ax = fig.add_axes([0.9, 0.15, 0.03, 0.7])
 cbar_ax.set_xlabel('$T$ / K', labelpad=20)
 fig.colorbar(im, cax=cbar_ax)
 plt.show()
+'''
