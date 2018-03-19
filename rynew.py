@@ -9,6 +9,8 @@ dx = dy = 0.1
 D = 0.1328
 
 
+
+
 # waterDiffusivity returns the diffusivity of water at a given temperature
 # in mm^2/s it is accurate between 0 < t < 550 degC
 def waterDiffusivity(t):
@@ -47,7 +49,7 @@ u0 = Tcool * np.ones((nx, ny))
 u = np.empty((nx, ny))
 
 # Initial conditions - ring of inner radius r, width dr centred at (cx,cy) (mm)
-r, cx, cy = 16, w/2, h/2
+r, cx, cy = 16, w/2., h/2.
 r2 = r**2
 for i in range(nx):
     for j in range(ny):
@@ -68,9 +70,9 @@ def do_timestep(u0, u):
 
 
 # Number of timesteps
-nsteps = 101
+nsteps = 1001
 # Output 4 figures at these timesteps
-mfig = [0, nsteps/3, 2*nsteps/3, nsteps]
+mfig = [0, int(nsteps/3), int(2*nsteps/3), nsteps - 1]
 fignum = 0
 fig = plt.figure()
 for m in range(nsteps):
