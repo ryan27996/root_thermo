@@ -74,7 +74,6 @@ def getMeltRadius(array, length, melt_temp):
     return r2
 
 
-
 def do_timestep(u0, u):
 
     # Propagate with forward-difference in time, central-difference in space
@@ -98,10 +97,10 @@ nsteps = 10001
 # mfig = [0, int(nsteps/3), int(2*nsteps/3), nsteps - 1]
 # fignum = 0
 
-t=0
+t = 0
 while t <= nsteps:
     u0, u = do_timestep(u0, u)
-    t+=1
+    t += 1
     # print(t)
 
     if (t % 100) == 0:
