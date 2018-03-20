@@ -9,11 +9,11 @@ def waterDiffusivity(t):
     in mm^2/s it is accurate between 0 < t < 550 degC
     """
     #  Diffusivity source: DOI: 10.1063/1.555718
-    TD_ICE = 0.1328  # mm^2/s Diffusivity T=0C P=0.5MPa
-    TD_VAP25 = 0.1456  # mm^2/s Diffusivity T=25 P=0.5MPa
+    TD_ICE = 0.1328     # mm^2/s Diffusivity T=0C  P=0.5MPa
+    TD_VAP25 = 0.1456   # mm^2/s Diffusivity T=25  P=0.5MPa
     TD_VAP150 = 0.1725  # mm^2/s Diffusivity T=150 P=0.5MPa
-    TD_VAP200 = 6.942  # mm^2/s Diffusivity T=200 P=0.5MPa
-    TD_VAP550 = 25.58  # mm^2/s Diffusivity T=550 P=0.5MPa
+    TD_VAP200 = 6.942   # mm^2/s Diffusivity T=200 P=0.5MPa
+    TD_VAP550 = 25.58   # mm^2/s Diffusivity T=550 P=0.5MPa
 
     if t >= 0 and t < 25:
         return (TD_ICE - TD_VAP25) / (0 - 25) * t + TD_ICE
