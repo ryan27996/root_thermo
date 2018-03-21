@@ -1,11 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.patches import Circle
 
 # plate size, mm
-w = h = 100.
+w = h = 1000.
 # intervals in x-, y- directions, mm
-dx = dy = 0.1
+dx = dy = 1
 # Thermal diffusivity of steel, mm2.s-1
 D = 0.1328
 
@@ -58,20 +57,12 @@ for i in range(nx):
             u0[i, j] = Thot
 
 
-def getMeltRadius(array, length, melt_temp):
-    x = int(length / 2)
-    # r1 = 0
-    r2 = 0
-    # for y in range(x, 0, -1):
-    #     if array[x, y] <= melt_temp:
-    #         r1 = y
-    #         break
+def getMeltRadius(array, melt_temp):
+    length = len(array)
+    xc = int(length / 2)  # Centerpoint
     for y in range(0, length - 1):
-        if array[x, y] > melt_temp:
-            r2 = x - y
-            break
-    # print(r1, r2)
-    return r2
+        if array[xc, y] > melt_temp:
+            return xc - y
 
 
 def do_timestep(u0, u):
@@ -92,7 +83,7 @@ def do_timestep(u0, u):
 
 
 # Number of timesteps
-nsteps = 10001
+nsteps = 100001
 # Output 4 figures at these timesteps
 # mfig = [0, int(nsteps/3), int(2*nsteps/3), nsteps - 1]
 # fignum = 0
@@ -104,15 +95,16 @@ while t <= nsteps:
     # print(t)
 
     if (t % 100) == 0:
-        # r = getMeltRadius(u, int(w), Tmelt)  # Array, Length, Melt_temp
-        # print(r)
+        r = getMeltRadius(u, Tmelt)  # Array, Melt_temp
         x = np.arange(0, w, dx)
         y = np.arange(0, h, dy)
         X, Y = np.meshgrid(x, y)
         fig2 = plt.figure()
-        # circle2 = plt.Circle((w/2, h/2), r, color='r', fill=False, linewidth = 2.0)
-        # ax = plt.gca()
-        # ax.add_artist(circle2)
+        circle2 = plt.Circle(
+            (w/2, h/2), r*dx,
+            color='r', linestyle='dashed', fill=False, linewidth=2.0)
+        ax = plt.gca()
+        ax.add_artist(circle2)
         cp1 = plt.contourf(X, Y, u.copy(), 20)
 
         plt.title('Contour Plot of Tempeture in ice after t = {:.1f}s'.format(t*dt))
