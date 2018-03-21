@@ -78,20 +78,26 @@ DisplayArray(u_init, name="out-{0}.png".format(str(0).zfill(6), rng=[-0.1, 0.1],
 # eps -- time resolution
 # damping -- wave damping
 eps = tf.placeholder(tf.float32, shape=())
-damping = tf.placeholder(tf.float32, shape=())
+# damping = tf.placeholder(tf.float32, shape=())
 
 # Create variables for simulation state
 U = tf.Variable(u_init)
 Ut = tf.Variable(ut_init)
+Ur = tf.Variable(ut_init)
 
 # Discretized PDE update rules
-U_ = U + eps * Ut
-Ut_ = Ut + eps * (laplace(U) - damping * Ut)
+# U_ = U + eps * Ut
+# Ut_ = Ut + eps * (laplace(U) - damping * Ut)
+
+U_ = U + Ut
+Ut_ = Ut + laplace(U)
+Ur_ = U
 
 # Operation to update the state
 step = tf.group(
     U.assign(U_),
-    Ut.assign(Ut_))
+    Ut.assign(Ut_),
+    Ur.assign(Ur_))
 
 # Initialize state to initial conditions
 tf.initialize_all_variables().run()
@@ -99,6 +105,6 @@ tf.initialize_all_variables().run()
 # Run 1000 steps of PDE
 for i in range(1000):
     # Step simulation
-    step.run({eps: 0.1, damping: 0.0})
+    step.run()
     if (i % 10) == 0:
         DisplayArray(U.eval(), name="out-{0}.png".format(str(i).zfill(6), rng=[-0.1, 0.1], fmt='png'))
