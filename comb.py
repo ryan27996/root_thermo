@@ -54,12 +54,12 @@ def saveArrayt(a, t, meltTemp=0, dunits="mm", tunits="ms", step=1):
 
     plt.title(
         'Contour Plot of Tempeture in ice' +
-        'after t = {0:.1f}{1} and r = {2}{3}'.format(
+        'after t = {0:.2f}{1} and r = {2:.2f}{3}'.format(
                     t, tunits,        r*step, dunits))
     plt.xlabel('x ({0})'.format(dunits))
     plt.ylabel('y ({0})'.format(dunits))
     plt.colorbar(cp1)
-    plt.savefig("out-{0}.png".format(str(t).zfill(6)))
+    plt.savefig("out-{0:.2f}.png".format(t))
     plt.close()
 
 
