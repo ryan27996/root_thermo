@@ -108,3 +108,37 @@ if __name__ == "__main__":
                 U0[i, j] = Uhot  # Root
 
     saveArrayt(a=U0, t=t, meltTemp=Umelt, step=dx)  # Print initial conditions
+
+    # I understand everything ABOVE this point.
+    sess = tf.Session()
+
+    def make_kernel(a):
+        """Transform a 2D array into a convolution kernel"""
+        # https://www.youtube.com/watch?v=6yrPU8rYOhs
+        a = np.asarray(a)
+        a = a.reshape(list(a.shape) + [1, 1])
+        return tf.constant(a, dtype=1)
+
+    def simple_conv(x, k):
+        """A simplified 2D convolution operation"""
+        x = tf.expand_dims(tf.expand_dims(x, 0), -1)
+        y = tf.nn.depthwise_conv2d(x, k, [1, 1, 1, 1], padding='SAME')
+        return y[0, :, :, 0]
+
+    # https://en.wikipedia.org/wiki/Discrete_Laplace_operator
+    def laplace(x):
+        """Compute the 2D laplacian of an array"""
+        laplace_k = make_kernel([[0.5, 1.0, 0.5],
+                                 [1.0, -6., 1.0],
+                                 [0.5, 1.0, 0.5]])
+        return simple_conv(x, laplace_k)
+
+    U = tf.Variable(U0)
+    U_ = laplace(U)
+    step = tf.group(U.assign(U_))
+    tf.initialize_all_variables().run(session=sess)
+    for i in range(1000):
+        # Step simulatio
+        step.run(session=sess)
+        if (i % 1) == 0:
+            saveArrayt(a=U.eval(session=sess), t=i*dt, meltTemp=Umelt, step=dx)
