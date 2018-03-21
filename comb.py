@@ -79,7 +79,7 @@ if __name__ == "__main__":
     steps = 1000   # Number of time steps
     t = 0          # Innitial time t_0 in ms
     D = 0.1328     # Minimum diffusivity (in this case, ice) in mm^2/s
-    Umelt = 0      # Ice melt temp in C    Source:TODO
+    Umelt = 10      # Ice melt temp in C    Source:TODO
     Uhot = 500     # Hot core temp in C    Source:TODO
     Uice = -20     # Ice temp in C         Source:TODO
     r = 16         # Root radius in mm
