@@ -49,3 +49,5 @@ flycheck_*.el
 
 # Atom Directory
 .ropeproject/
+
+/tmp/

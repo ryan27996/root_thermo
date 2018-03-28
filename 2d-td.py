@@ -1,11 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.patches import Circle
 
 # plate size, mm
-w = h = 100.
+w = h = 500.
 # intervals in x-, y- directions, mm
-dx = dy = 0.1
+dx = dy = 1
 # Thermal diffusivity of steel, mm2.s-1
 D = 0.1328
 
@@ -51,28 +50,29 @@ u = np.empty((nx, ny))
 # Initial conditions - ring of inner radius r, width dr centred at (cx,cy) (mm)
 r, cx, cy = 16, w/2., h/2.
 r2 = r**2
+# for i in range(nx):
+#     for j in range(ny):
+#         p2 = (i*dx-cx)**2 + (j*dy-cy)**2
+#         if p2 < r2:
+#             u0[i, j] = Thot
+
+hrr = int(r*2*dx)
 for i in range(nx):
     for j in range(ny):
         p2 = (i*dx-cx)**2 + (j*dy-cy)**2
         if p2 < r2:
-            u0[i, j] = Thot
+            u0[i+hrr, j] = Thot
+            u0[i-hrr, j] = Thot
+            u0[i, j+hrr] = Thot
+            u0[i, j-hrr] = Thot
 
 
-def getMeltRadius(array, length, melt_temp):
-    x = int(length / 2)
-    # r1 = 0
-    r2 = 0
-    # for y in range(x, 0, -1):
-    #     if array[x, y] <= melt_temp:
-    #         r1 = y
-    #         break
+def getMeltRadius(array, melt_temp):
+    length = len(array)
+    xc = int(length / 2)  # Centerpoint
     for y in range(0, length - 1):
-        if array[x, y] > melt_temp:
-            r2 = x - y
-            break
-    # print(r1, r2)
-    return r2
-
+        if array[xc, y] > melt_temp:
+            return xc - y
 
 
 def do_timestep(u0, u):
@@ -83,44 +83,54 @@ def do_timestep(u0, u):
           + (u0[1:-1, 2:] - 2*u0[1:-1, 1:-1] + u0[1:-1, :-2])/dy2
           )
 
+    mr = int(getMeltRadius(u0, Tmelt)*dx)
+    rr = int(r/2*dx)
+    dr = mr - rr
     for i in range(nx):
         for j in range(ny):
             p2 = (i*dx-cx)**2 + (j*dy-cy)**2
             if p2 < r2:
-                u[i, j] = Thot
+                u[i+dr, j] = Thot
+                u[i-dr, j] = Thot
+                u[i, j+dr] = Thot
+                u[i, j-dr] = Thot
     u0 = u.copy()
     return u0, u
 
 
 # Number of timesteps
-nsteps = 10001
+nsteps = 100001
 # Output 4 figures at these timesteps
 # mfig = [0, int(nsteps/3), int(2*nsteps/3), nsteps - 1]
 # fignum = 0
 
-t=0
+t = 0
 while t <= nsteps:
     u0, u = do_timestep(u0, u)
-    t+=1
+    t += 1
     # print(t)
 
-    if (t % 100) == 0:
-        # r = getMeltRadius(u, int(w), Tmelt)  # Array, Length, Melt_temp
-        # print(r)
+    if (t % 1) == 0:
+        r = getMeltRadius(u, Tmelt)  # Array, Melt_temp
         x = np.arange(0, w, dx)
         y = np.arange(0, h, dy)
         X, Y = np.meshgrid(x, y)
         fig2 = plt.figure()
-        # circle2 = plt.Circle((w/2, h/2), r, color='r', fill=False, linewidth = 2.0)
-        # ax = plt.gca()
-        # ax.add_artist(circle2)
+        circle2 = plt.Circle(
+            (w/2, h/2), r*dx,
+            color='r', linestyle='dashed', fill=False, linewidth=2.0)
+        ax = plt.gca()
+        ax.add_artist(circle2)
         cp1 = plt.contourf(X, Y, u.copy(), 20)
 
-        plt.title('Contour Plot of Tempeture in ice after t = {:.1f}s'.format(t*dt))
+        plt.title(
+            'Contour Plot of Tempeture in ice' +
+            'after t = {0}{1} and r = {2}{3}'.format(
+                        int(t*dt), "s",        int(r*dx), "mm"))
         plt.xlabel('x (mm)')
         plt.ylabel('y (mm)')
         plt.colorbar(cp1)
-        plt.savefig("out-{0}.png".format(str(t).zfill(6)))
+        plt.savefig("out-{0}.png".format(str(int(t*dt)).zfill(6)))
         plt.close()
 
 '''
