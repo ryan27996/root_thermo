@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 # plate size, mm
 w = h = 500.
 # intervals in x-, y- directions, mm
-dx = dy = 0.5
+dx = dy = 1
 # Thermal diffusivity of steel, mm2.s-1
 D = 0.1328
 
@@ -50,11 +50,21 @@ u = np.empty((nx, ny))
 # Initial conditions - ring of inner radius r, width dr centred at (cx,cy) (mm)
 r, cx, cy = 16, w/2., h/2.
 r2 = r**2
+# for i in range(nx):
+#     for j in range(ny):
+#         p2 = (i*dx-cx)**2 + (j*dy-cy)**2
+#         if p2 < r2:
+#             u0[i, j] = Thot
+
+hrr = int(r*2*dx)
 for i in range(nx):
     for j in range(ny):
         p2 = (i*dx-cx)**2 + (j*dy-cy)**2
         if p2 < r2:
-            u0[i, j] = Thot
+            u0[i+hrr, j] = Thot
+            u0[i-hrr, j] = Thot
+            u0[i, j+hrr] = Thot
+            u0[i, j-hrr] = Thot
 
 
 def getMeltRadius(array, melt_temp):
@@ -73,11 +83,17 @@ def do_timestep(u0, u):
           + (u0[1:-1, 2:] - 2*u0[1:-1, 1:-1] + u0[1:-1, :-2])/dy2
           )
 
+    mr = int(getMeltRadius(u0, Tmelt)*dx)
+    rr = int(r/2*dx)
+    dr = mr - rr
     for i in range(nx):
         for j in range(ny):
             p2 = (i*dx-cx)**2 + (j*dy-cy)**2
             if p2 < r2:
-                u[i, j] = Thot
+                u[i+dr, j] = Thot
+                u[i-dr, j] = Thot
+                u[i, j+dr] = Thot
+                u[i, j-dr] = Thot
     u0 = u.copy()
     return u0, u
 
@@ -94,7 +110,7 @@ while t <= nsteps:
     t += 1
     # print(t)
 
-    if (t % 100) == 0:
+    if (t % 1) == 0:
         r = getMeltRadius(u, Tmelt)  # Array, Melt_temp
         x = np.arange(0, w, dx)
         y = np.arange(0, h, dy)
@@ -116,8 +132,6 @@ while t <= nsteps:
         plt.colorbar(cp1)
         plt.savefig("out-{0}.png".format(str(int(t*dt)).zfill(6)))
         plt.close()
-        if r > 150:
-            break
 
 '''
 fig = plt.figure()
