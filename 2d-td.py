@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import pdb
 
 
 # waterDiffusivity returns the diffusivity of water at a given temperature
@@ -45,11 +46,35 @@ def do_timestep(u0, u):
           + (u0[1:-1, 2:]['Temp'] - 2*u0[1:-1, 1:-1]['Temp'] + u0[1:-1, :-2]['Temp'])/dy2
           )
 
-    mr = int(getMeltRadius(u0, Tmelt)*dx)
-    rr = int(r/2*dx)
-    dr = mr - rr
-    for i in range(nx):
-        for j in range(ny):
+    melt_radius = int(getMeltRadius(u0, Tmelt)*dx)  # Melt Radius
+    rr = int(r*dx)                                  # Root Radius
+    dr = melt_radius - rr
+    u = u0
+    for i in range(1, nx - 1):
+        for j in range(1, ny - 1):
+            # Apply State Change
+            if u0[i, j]['Temp'] >= Tmelt:
+                if u0[i, j]['StateChange'] == True:
+                    print("YO")
+                    #add Energy
+                    Energy_new = 10
+                    Energy_state = 100
+                    Energy_state_change = 30
+                    u[i, j]['Energy'] = u0[i, j]['Energy'] + Energy_new    # TODO add energy_new
+
+                    if u[i, j]['Energy'] >= Energy_state_change:
+                        u0[i, j]['StateChange'] = False
+
+                else:
+                    uxx = (u0[i+1, j]['Temp'] - 2*u0[i, j]['Temp'] + u0[i-1, j]['Temp']) / dx2
+                    uyy = (u0[i, j+1]['Temp'] - 2*u0[i, j]['Temp'] + u0[i, j-1]['Temp']) / dy2
+                    u[i, j]['Temp'] = u0[i, j]['Temp'] + D * (uxx + uyy)
+
+            else:
+                uxx = (u0[i+1, j]['Temp'] - 2*u0[i, j]['Temp'] + u0[i-1, j]['Temp']) / dx2
+                uyy = (u0[i, j+1]['Temp'] - 2*u0[i, j]['Temp'] + u0[i, j-1]['Temp']) / dy2
+                u[i, j]['Temp'] = u0[i, j]['Temp'] + dt * D * (uxx + uyy)
+
             p2 = (i*dx-cx)**2 + (j*dy-cy)**2
             if p2 < r2:
                 u[i+dr, j]['Temp'] = Thot
@@ -81,7 +106,7 @@ gridArray = np.dtype([('Temp', np.float64),
 u0 = np.empty((nx, ny), gridArray)
 u = np.empty((nx, ny), gridArray)
 u0[:, :]['Temp'] = Tcool
-u0[:, :]['StateChange'] = False
+u0[:,:]['StateChange'] = False
 u0[:, :]['Energy'] = 0.0
 
 
@@ -104,6 +129,29 @@ for i in range(nx):
             u0[i, j+hrr]['Temp'] = Thot
             u0[i, j-hrr]['Temp'] = Thot
 
+
+r = getMeltRadius(u0, Tmelt)  # Array, Melt_temp
+x = np.arange(0, w, dx)
+y = np.arange(0, h, dy)
+X, Y = np.meshgrid(x, y)
+fig2 = plt.figure()
+circle2 = plt.Circle(
+    (w/2, h/2), r*dx,
+    color='r', linestyle='dashed', fill=False, linewidth=2.0)
+ax = plt.gca()
+ax.add_artist(circle2)
+cp1 = plt.contourf(X, Y, u0['Temp'].copy(), 20)
+
+plt.title(
+    'Contour Plot of Tempeture in ice' +
+    'after t = {0}{1} and r = {2}{3}'.format(
+                int(0), "s",        int(r*dx), "mm"))
+plt.xlabel('x (mm)')
+plt.ylabel('y (mm)')
+plt.colorbar(cp1)
+plt.savefig("out-{0}.png".format(str(int(0)).zfill(6)))
+plt.close()
+
 # Number of timesteps
 nsteps = 100001
 # Output 4 figures at these timesteps
@@ -112,11 +160,13 @@ nsteps = 100001
 
 t = 0
 while t <= nsteps:
+
     u0, u = do_timestep(u0, u)
     t += 1
     # print(t)
 
-    if (t % 1) == 0:
+    # if (t % 1) == 0:
+    if True:
         r = getMeltRadius(u, Tmelt)  # Array, Melt_temp
         x = np.arange(0, w, dx)
         y = np.arange(0, h, dy)
