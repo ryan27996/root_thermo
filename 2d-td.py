@@ -1,13 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# plate size, mm
-w = h = 500.
-# intervals in x-, y- directions, mm
-dx = dy = 1
-# Thermal diffusivity of steel, mm2.s-1
-D = 0.1328
-
 
 # waterDiffusivity returns the diffusivity of water at a given temperature
 # in mm^2/s it is accurate between 0 < t < 550 degC
@@ -35,6 +28,44 @@ def waterDiffusivity(t):
         return (TD_VAP200 - TD_VAP550) / (200 - 550) * (t - 200) + TD_VAP200
         print("WARN: waterDiffusivity is wrong at temperature {0}".format(t))
 
+
+def getMeltRadius(array, melt_temp):
+    length = len(array)
+    xc = int(length / 2)  # Centerpoint
+    for y in range(0, length - 1):
+        if array[xc, y]['Temp'] > melt_temp:
+            return xc - y
+
+
+def do_timestep(u0, u):
+
+    # Propagate with forward-difference in time, central-difference in space
+    u[1:-1, 1:-1]['Temp'] = u0[1:-1, 1:-1]['Temp'] + D * dt * (
+          (u0[2:, 1:-1]['Temp'] - 2*u0[1:-1, 1:-1]['Temp'] + u0[:-2, 1:-1]['Temp'])/dx2
+          + (u0[1:-1, 2:]['Temp'] - 2*u0[1:-1, 1:-1]['Temp'] + u0[1:-1, :-2]['Temp'])/dy2
+          )
+
+    mr = int(getMeltRadius(u0, Tmelt)*dx)
+    rr = int(r/2*dx)
+    dr = mr - rr
+    for i in range(nx):
+        for j in range(ny):
+            p2 = (i*dx-cx)**2 + (j*dy-cy)**2
+            if p2 < r2:
+                u[i+dr, j]['Temp'] = Thot
+                u[i-dr, j]['Temp'] = Thot
+                u[i, j+dr]['Temp'] = Thot
+                u[i, j-dr]['Temp'] = Thot
+    u0 = u.copy()
+    return u0, u
+
+
+# plate size, mm
+w = h = 500.
+# intervals in x-, y- directions, mm
+dx = dy = 1
+# Thermal diffusivity of steel, mm2.s-1
+D = 0.1328
 
 Tcool, Thot = -20, 500
 Tmelt = 0.0
@@ -72,38 +103,6 @@ for i in range(nx):
             u0[i-hrr, j]['Temp'] = Thot
             u0[i, j+hrr]['Temp'] = Thot
             u0[i, j-hrr]['Temp'] = Thot
-
-
-def getMeltRadius(array, melt_temp):
-    length = len(array)
-    xc = int(length / 2)  # Centerpoint
-    for y in range(0, length - 1):
-        if array[xc, y]['Temp'] > melt_temp:
-            return xc - y
-
-
-def do_timestep(u0, u):
-
-    # Propagate with forward-difference in time, central-difference in space
-    u[1:-1, 1:-1]['Temp'] = u0[1:-1, 1:-1]['Temp'] + D * dt * (
-          (u0[2:, 1:-1]['Temp'] - 2*u0[1:-1, 1:-1]['Temp'] + u0[:-2, 1:-1]['Temp'])/dx2
-          + (u0[1:-1, 2:]['Temp'] - 2*u0[1:-1, 1:-1]['Temp'] + u0[1:-1, :-2]['Temp'])/dy2
-          )
-
-    mr = int(getMeltRadius(u0, Tmelt)*dx)
-    rr = int(r/2*dx)
-    dr = mr - rr
-    for i in range(nx):
-        for j in range(ny):
-            p2 = (i*dx-cx)**2 + (j*dy-cy)**2
-            if p2 < r2:
-                u[i+dr, j]['Temp'] = Thot
-                u[i-dr, j]['Temp'] = Thot
-                u[i, j+dr]['Temp'] = Thot
-                u[i, j-dr]['Temp'] = Thot
-    u0 = u.copy()
-    return u0, u
-
 
 # Number of timesteps
 nsteps = 100001
