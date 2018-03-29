@@ -75,12 +75,12 @@ def do_timestep(u0, u):
                 uyy = (u0[i, j+1]['Temp'] - 2*u0[i, j]['Temp'] + u0[i, j-1]['Temp']) / dy2
                 u[i, j]['Temp'] = u0[i, j]['Temp'] + dt * D * (uxx + uyy)
 
-            p2 = (i*dx-cx)**2 + (j*dy-cy)**2
-            if p2 < r2:
-                u[i+dr, j]['Temp'] = Thot
-                u[i-dr, j]['Temp'] = Thot
-                u[i, j+dr]['Temp'] = Thot
-                u[i, j-dr]['Temp'] = Thot
+        p2 = (i*dx-cx)**2 + (j*dy-cy)**2
+        if p2 < r2:
+            u[i+dr, j]['Temp'] = Thot
+            u[i-dr, j]['Temp'] = Thot
+            u[i, j+dr]['Temp'] = Thot
+            u[i, j-dr]['Temp'] = Thot
     u0 = u.copy()
     return u0, u
 
