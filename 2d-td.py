@@ -46,15 +46,16 @@ def do_timestep(u0, u):
           + (u0[1:-1, 2:]['Temp'] - 2*u0[1:-1, 1:-1]['Temp'] + u0[1:-1, :-2]['Temp'])/dy2
           )
 
-    melt_radius = int(getMeltRadius(u0, Tmelt)*dx)  # Melt Radius
-    rr = int(r*dx)                                  # Root Radius
-    dr = melt_radius - rr
+    # melt_radius = int(getMeltRadius(u0, Tmelt)*dx)  # Melt Radius
+    # rr = r*dx                                  # Root Radius
+    # dr = melt_radius - rr
+    # rr2 = rr**2
     u = u0
     for i in range(1, nx - 1):
         for j in range(1, ny - 1):
             # Apply State Change
             if u0[i, j]['Temp'] >= Tmelt:
-                if u0[i, j]['StateChange'] == True:
+                if u0[i, j]['StateChange'] is True:
                     # add Energy
                     Energy_new = 10
                     # Energy_state = 100
@@ -78,12 +79,16 @@ def do_timestep(u0, u):
                     u0[i, j]['StateChange'] = True
                     # u[i, j]['Temp'] = Tmelt
 
-        p2 = (i*dx-cx)**2 + (j*dy-cy)**2
-        if p2 < r2:
-            u[i+dr, j]['Temp'] = Thot
-            u[i-dr, j]['Temp'] = Thot
-            u[i, j+dr]['Temp'] = Thot
-            u[i, j-dr]['Temp'] = Thot
+    for i in range(nx):
+        for j in range(ny):
+            p2 = (i*dx-cx)**2 + (j*dy-cy)**2
+            if p2 < r2:
+                print("yup")
+                # u0[i+hrr, j]['Temp'] = Thot
+                # u0[i-hrr, j]['Temp'] = Thot
+                # u0[i, j+hrr]['Temp'] = Thot
+                # u0[i, j-hrr]['Temp'] = Thot
+                u[i, j]['Temp'] = Thot
     u0 = u.copy()
     return u0, u
 
@@ -127,10 +132,11 @@ for i in range(nx):
     for j in range(ny):
         p2 = (i*dx-cx)**2 + (j*dy-cy)**2
         if p2 < r2:
-            u0[i+hrr, j]['Temp'] = Thot
-            u0[i-hrr, j]['Temp'] = Thot
-            u0[i, j+hrr]['Temp'] = Thot
-            u0[i, j-hrr]['Temp'] = Thot
+            # u0[i+hrr, j]['Temp'] = Thot
+            # u0[i-hrr, j]['Temp'] = Thot
+            # u0[i, j+hrr]['Temp'] = Thot
+            # u0[i, j-hrr]['Temp'] = Thot
+            u0[i, j]['Temp'] = Thot
 
 
 r = getMeltRadius(u0, Tmelt)  # Array, Melt_temp
@@ -168,7 +174,7 @@ while t <= nsteps:
     t += 1
     # print(t)
 
-    # if (t % 1) == 0:
+    # if (t % 100) == 0:
     if True:
         r = getMeltRadius(u, Tmelt)  # Array, Melt_temp
         x = np.arange(0, w, dx)
