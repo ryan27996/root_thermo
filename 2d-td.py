@@ -84,11 +84,11 @@ def do_timestep(u0, u):
             p2 = (i*dx-cx)**2 + (j*dy-cy)**2
             if p2 < r2:
                 print("yup")
-                # u0[i+hrr, j]['Temp'] = Thot
-                # u0[i-hrr, j]['Temp'] = Thot
-                # u0[i, j+hrr]['Temp'] = Thot
-                # u0[i, j-hrr]['Temp'] = Thot
-                u[i, j]['Temp'] = Thot
+                u[i+hrr, j]['Temp'] = Thot
+                u[i-hrr, j]['Temp'] = Thot
+                u[i, j+hrr]['Temp'] = Thot
+                u[i, j-hrr]['Temp'] = Thot
+                # u[i, j]['Temp'] = Thot
     u0 = u.copy()
     return u0, u
 
@@ -132,11 +132,11 @@ for i in range(nx):
     for j in range(ny):
         p2 = (i*dx-cx)**2 + (j*dy-cy)**2
         if p2 < r2:
-            # u0[i+hrr, j]['Temp'] = Thot
-            # u0[i-hrr, j]['Temp'] = Thot
-            # u0[i, j+hrr]['Temp'] = Thot
-            # u0[i, j-hrr]['Temp'] = Thot
-            u0[i, j]['Temp'] = Thot
+            u0[i+hrr, j]['Temp'] = Thot
+            u0[i-hrr, j]['Temp'] = Thot
+            u0[i, j+hrr]['Temp'] = Thot
+            u0[i, j-hrr]['Temp'] = Thot
+            # u0[i, j]['Temp'] = Thot
 
 
 r = getMeltRadius(u0, Tmelt)  # Array, Melt_temp
