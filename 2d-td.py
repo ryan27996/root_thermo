@@ -55,15 +55,15 @@ def do_timestep(u0, u):
             # Apply State Change
             if u0[i, j]['Temp'] >= Tmelt:
                 if u0[i, j]['StateChange'] == True:
-                    print("YO")
-                    #add Energy
+                    # add Energy
                     Energy_new = 10
-                    Energy_state = 100
+                    # Energy_state = 100
                     Energy_state_change = 30
                     u[i, j]['Energy'] = u0[i, j]['Energy'] + Energy_new    # TODO add energy_new
 
                     if u[i, j]['Energy'] >= Energy_state_change:
                         u0[i, j]['StateChange'] = False
+                        # print("State Change at {}, {}".format(i, j))
 
                 else:
                     uxx = (u0[i+1, j]['Temp'] - 2*u0[i, j]['Temp'] + u0[i-1, j]['Temp']) / dx2
@@ -74,6 +74,9 @@ def do_timestep(u0, u):
                 uxx = (u0[i+1, j]['Temp'] - 2*u0[i, j]['Temp'] + u0[i-1, j]['Temp']) / dx2
                 uyy = (u0[i, j+1]['Temp'] - 2*u0[i, j]['Temp'] + u0[i, j-1]['Temp']) / dy2
                 u[i, j]['Temp'] = u0[i, j]['Temp'] + dt * D * (uxx + uyy)
+                if u[i, j]['Temp'] >= Tmelt:
+                    u0[i, j]['StateChange'] = True
+                    # u[i, j]['Temp'] = Tmelt
 
         p2 = (i*dx-cx)**2 + (j*dy-cy)**2
         if p2 < r2:
@@ -93,7 +96,7 @@ dx = dy = 1
 D = 0.1328
 
 Tcool, Thot = -20, 500
-Tmelt = 0.0
+Tmelt = 10.0
 
 nx, ny = int(w/dx), int(h/dy)
 
