@@ -116,7 +116,7 @@ gridArray = np.dtype([('Temp', np.float64),
 u0 = np.empty((nx, ny), gridArray)
 u = np.empty((nx, ny), gridArray)
 u0[:, :]['Temp'] = Tcool
-u0[:,:]['StateChange'] = False
+u0[:, :]['StateChange'] = False
 u0[:, :]['Energy'] = 0.0
 
 
