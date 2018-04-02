@@ -8,11 +8,11 @@ import pdb
 def waterDiffusivity(t):
 
     #  Diffusivity 10.1063/1.555718
-    TD_ICE = 0.1328  # mm^2/s Diffusivity T=0C P=0.5MPa
-    TD_VAP25 = 0.1456  # mm^2/s Diffusivity T=25 P=0.5MPa
+    TD_ICE = 0.1328     # mm^2/s Diffusivity T=0C P=0.5MPa
+    TD_VAP25 = 0.1456   # mm^2/s Diffusivity T=25 P=0.5MPa
     TD_VAP150 = 0.1725  # mm^2/s Diffusivity T=150 P=0.5MPa
-    TD_VAP200 = 6.942  # mm^2/s Diffusivity T=200 P=0.5MPa
-    TD_VAP550 = 25.58  # mm^2/s Diffusivity T=550 P=0.5MPa
+    TD_VAP200 = 6.942   # mm^2/s Diffusivity T=200 P=0.5MPa
+    TD_VAP550 = 25.58   # mm^2/s Diffusivity T=550 P=0.5MPa
 
     if t >= 0 and t < 25:
         return (TD_ICE - TD_VAP25) / (0 - 25) * t + TD_ICE
@@ -58,13 +58,11 @@ def do_timestep(u0, u):
                 if u0[i, j]['StateChange'] is True:
                     # add Energy
                     Energy_new = 10
-                    # Energy_state = 100
-                    Energy_state_change = 30
                     u[i, j]['Energy'] = u0[i, j]['Energy'] + Energy_new    # TODO add energy_new
 
-                    if u[i, j]['Energy'] >= Energy_state_change:
+                    if u[i, j]['Energy'] >= EnergyMeltCell:
                         u0[i, j]['StateChange'] = False
-                        # print("State Change at {}, {}".format(i, j))
+                        #  print("State Change at {}, {}".format(i, j))
 
                 else:
                     uxx = (u0[i+1, j]['Temp'] - 2*u0[i, j]['Temp'] + u0[i-1, j]['Temp']) / dx2
@@ -99,7 +97,11 @@ w = h = 500.
 dx = dy = 1
 # Thermal diffusivity of steel, mm2.s-1
 D = 0.1328
-
+pice = 9.168E-7                                 # Density of ice [kg/mm^3]
+vCell = w**3                                    # Volume of a cell [mm^3]
+mCell = pice * vCell                            # Mass of Cell of ice [kg]
+EStateChangeIce2Vapor = 2543.0                  # [kJ/kg] at 0C
+EnergyMeltCell = EStateChangeIce2Vapor * mCell  # Energy to melt a cell of ice [kJ]
 Tcool, Thot = -20, 500
 Tmelt = 10.0
 
