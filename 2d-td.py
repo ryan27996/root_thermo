@@ -73,7 +73,7 @@ def do_timestep(u0, u):
     u = u0  # This is probably bad practice, but wutevz
     for i in range(1, nx - 1):
         for j in range(1, ny - 1):
-            if u0[i, j]['Temp'] == Tmelt:
+            if u0[i, j]['Temp'] >= Tmelt:
                 # This means the cell is either vapor or
                 # undergoing a state change.
                 if u0[i, j]['StateChange'] is True:
