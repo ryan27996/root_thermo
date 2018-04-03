@@ -107,7 +107,7 @@ if __name__ == "__main__":
                 # In the root radius...
                 U0[i, j] = Uhot  # Root
 
-        saveArrayt(a=U0, t=t, meltTemp=Umelt, step=dx)  # Print initial conditions
+        saveArrayt(a=U0, t=t, meltTemp=Umelt, step=dx)  # Print initial conds
 
     # I understand everything ABOVE this point.
     sess = tf.Session()
