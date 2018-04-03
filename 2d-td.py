@@ -70,25 +70,27 @@ def do_timestep(u0, u):
     # rr = r*dx                                  # Root Radius
     # dr = melt_radius - rr
     # rr2 = rr**2
-    u = u0  # This is probably bad practice, but wutevz
+    # u = u0  # This is probably bad practice, but wutevz
     for i in range(1, nx - 1):
         for j in range(1, ny - 1):
             myT = u0[i, j]['Temp']         # This should minimize array lookups
             myS = u0[i, j]['StateChange']  #
             myE = u0[i, j]['Energy']       #
-            if (myT == Tmelt) and myS is True:
+            # print("{}, {}: T={} S={} E={}".format(i, j, myT, myS, myE))
+            if myS:
+                # print("{}, {}: T={} S={} E={}".format(i, j, myT, myS, myE))
                 # This means the cell is undergoing a state change.
                 # Add energy to cell
                 # TODO: Find an actual value for this
-                Energy_new = 10
+                Energy_new = EnergyMeltCell/2
                 u[i, j]['Energy'] = myE + Energy_new
-
+                # print("State Change in progress at {}, {}".format(i, j))
                 if u[i, j]['Energy'] >= EnergyMeltCell:
                     # The cell is melted
-                    u0[i, j]['StateChange'] = False
-                    #  print("State Change at {}, {}".format(i, j))
+                    u[i, j]['StateChange'] = False
+                    # print("State Change finished at {}, {}".format(i, j))
 
-            if myT > Tmelt:
+            elif myT >= Tmelt:
                 # This cell is vapor, thus we can increase it's temperature
                 uxx = (u0[i+1, j]['Temp'] - 2*myT + u0[i-1, j]['Temp'])/dx2
                 uyy = (u0[i, j+1]['Temp'] - 2*myT + u0[i, j-1]['Temp'])/dy2
@@ -102,6 +104,7 @@ def do_timestep(u0, u):
                 u[i, j]['Temp'] = myT + D * (uxx + uyy)
                 if u[i, j]['Temp'] >= Tmelt:
                     # We are undergoing a state change now
+                    # print("State Change started at {}, {}".format(i, j))
                     u[i, j]['StateChange'] = True
                     u[i, j]['Temp'] = Tmelt
 
@@ -109,7 +112,6 @@ def do_timestep(u0, u):
         for j in range(ny):
             p2 = (i*dx-cx)**2 + (j*dy-cy)**2
             if p2 < r2:
-                print("yup")
                 u[i+hrr, j]['Temp'] = Thot
                 u[i-hrr, j]['Temp'] = Thot
                 u[i, j+hrr]['Temp'] = Thot
@@ -193,7 +195,7 @@ plt.savefig("out-{0}.png".format(str(int(0)).zfill(6)))
 plt.close()
 
 # Number of timesteps
-nsteps = 100001
+nsteps = 101
 # Output 4 figures at these timesteps
 # mfig = [0, int(nsteps/3), int(2*nsteps/3), nsteps - 1]
 # fignum = 0
@@ -205,7 +207,7 @@ while t <= nsteps:
     t += 1
     # print(t)
 
-    # if (t % 100) == 0:
+    # if (t % 101) == 0:
     if True:
         r = getMeltRadius(u, Tmelt)  # Array, Melt_temp
         x = np.arange(0, w, dx)
