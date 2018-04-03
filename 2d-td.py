@@ -117,8 +117,9 @@ def do_timestep(u0, u):
                     ) / dy2
                 u[i, j]['Temp'] = u0[i, j]['Temp'] + D * (uxx + uyy)
                 if u[i, j]['Temp'] >= Tmelt:
-                    u0[i, j]['StateChange'] = True
-                    # u[i, j]['Temp'] = Tmelt
+                    # We are undergoing a state change now
+                    u[i, j]['StateChange'] = True
+                    u[i, j]['Temp'] = Tmelt
 
     for i in range(nx):
         for j in range(ny):
