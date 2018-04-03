@@ -1,12 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import pdb
+# import pdb
 
 
-# waterDiffusivity returns the diffusivity of water at a given temperature
-# in mm^2/s it is accurate between 0 < t < 550 degC
 def waterDiffusivity(t):
+    """
+    waterDiffusivity returns the diffusivity of water at a given temperature
+    `t` in mm^2/s it is accurate between 0 < t < 550 degC in units [mm^2/s]
 
+    This assumes a pressure of 0.5Mpa
+    """
     #  Diffusivity 10.1063/1.555718
     TD_ICE = 0.1328     # mm^2/s Diffusivity T=0C P=0.5MPa
     TD_VAP25 = 0.1456   # mm^2/s Diffusivity T=25 P=0.5MPa
@@ -31,6 +34,12 @@ def waterDiffusivity(t):
 
 
 def getMeltRadius(array, melt_temp):
+    """
+    Finds the melt radius in cell units given the `array` and melt temperature
+    `melt_temp`
+
+    Remember to multiply by dx to get the value in the units of dx.
+    """
     length = len(array)
     xc = int(length / 2)  # Centerpoint
     for y in range(0, length - 1):
@@ -91,17 +100,18 @@ def do_timestep(u0, u):
     return u0, u
 
 
+# TODO: Separate lib with main
 # plate size, mm
 w = h = 500.
 # intervals in x-, y- directions, mm
 dx = dy = 1
 # Thermal diffusivity of steel, mm2.s-1
 D = 0.1328
-pice = 9.168E-7                                 # Density of ice [kg/mm^3]
-vCell = w**3                                    # Volume of a cell [mm^3]
-mCell = pice * vCell                            # Mass of Cell of ice [kg]
-EStateChangeIce2Vapor = 2543.0                  # [kJ/kg] at 0C
-EnergyMeltCell = EStateChangeIce2Vapor * mCell  # Energy to melt a cell of ice [kJ]
+pice = 9.168E-7                      # Density of ice [kg/mm^3]
+vCell = w**3                         # Volume of a cell [mm^3]
+mCell = pice * vCell                 # Mass of Cell of ice [kg]
+EIce2Vapor = 2543.0                  # [kJ/kg] at 0C
+EnergyMeltCell = EIce2Vapor * mCell  # Energy to melt a cell of ice [kJ]
 Tcool, Thot = -20, 500
 Tmelt = 10.0
 
@@ -140,7 +150,7 @@ for i in range(nx):
             u0[i, j-hrr]['Temp'] = Thot
             # u0[i, j]['Temp'] = Thot
 
-
+# TODO: Make this printing a function call
 r = getMeltRadius(u0, Tmelt)  # Array, Melt_temp
 x = np.arange(0, w, dx)
 y = np.arange(0, h, dy)
