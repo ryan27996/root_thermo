@@ -48,40 +48,74 @@ def getMeltRadius(array, melt_temp):
 
 
 def do_timestep(u0, u):
-
+    # TODO: This function requires many global constats, these should be passed
+    # or determined during the function call.
     # Propagate with forward-difference in time, central-difference in space
-    u[1:-1, 1:-1]['Temp'] = u0[1:-1, 1:-1]['Temp'] + D * dt * (
-          (u0[2:, 1:-1]['Temp'] - 2*u0[1:-1, 1:-1]['Temp'] + u0[:-2, 1:-1]['Temp'])/dx2
-          + (u0[1:-1, 2:]['Temp'] - 2*u0[1:-1, 1:-1]['Temp'] + u0[1:-1, :-2]['Temp'])/dy2
-          )
+    # TODO: Consider using non constant diffusivity
+    # NOTE: This does nothing due to the u = u0 line.
+    # u[1:-1, 1:-1]['Temp'] = u0[1:-1, 1:-1]['Temp'] + D * dt * (
+    #       (
+    #         u0[2:, 1:-1]['Temp']
+    #         - 2*u0[1:-1, 1:-1]['Temp']
+    #         + u0[:-2, 1:-1]['Temp']
+    #       )/dx2
+    #       + (
+    #         u0[1:-1, 2:]['Temp']
+    #         - 2*u0[1:-1, 1:-1]['Temp']
+    #         + u0[1:-1, :-2]['Temp']
+    #       )/dy2
+    #      )
 
     # melt_radius = int(getMeltRadius(u0, Tmelt)*dx)  # Melt Radius
     # rr = r*dx                                  # Root Radius
     # dr = melt_radius - rr
     # rr2 = rr**2
-    u = u0
+    u = u0  # This is probably bad practice, but wutevz
     for i in range(1, nx - 1):
         for j in range(1, ny - 1):
-            # Apply State Change
-            if u0[i, j]['Temp'] >= Tmelt:
+            if u0[i, j]['Temp'] == Tmelt:
+                # This means the cell is either vapor or
+                # undergoing a state change.
                 if u0[i, j]['StateChange'] is True:
-                    # add Energy
+                    # State change is occuring
+                    # Add energy to cell
+                    # TODO: Find an actual value for this
                     Energy_new = 10
-                    u[i, j]['Energy'] = u0[i, j]['Energy'] + Energy_new    # TODO add energy_new
+                    u[i, j]['Energy'] = u0[i, j]['Energy'] + Energy_new
 
                     if u[i, j]['Energy'] >= EnergyMeltCell:
+                        # The cell is melted
                         u0[i, j]['StateChange'] = False
                         #  print("State Change at {}, {}".format(i, j))
 
                 else:
-                    uxx = (u0[i+1, j]['Temp'] - 2*u0[i, j]['Temp'] + u0[i-1, j]['Temp']) / dx2
-                    uyy = (u0[i, j+1]['Temp'] - 2*u0[i, j]['Temp'] + u0[i, j-1]['Temp']) / dy2
+                    # This cell is vapor, thus we can increase it's temperature
+                    uxx = (
+                        u0[i+1, j]['Temp']
+                        - 2*u0[i, j]['Temp']
+                        + u0[i-1, j]['Temp']
+                        ) / dx2
+                    uyy = (
+                        u0[i, j+1]['Temp']
+                        - 2*u0[i, j]['Temp']
+                        + u0[i, j-1]['Temp']
+                        ) / dy2
                     u[i, j]['Temp'] = u0[i, j]['Temp'] + D * (uxx + uyy)
 
             else:
-                uxx = (u0[i+1, j]['Temp'] - 2*u0[i, j]['Temp'] + u0[i-1, j]['Temp']) / dx2
-                uyy = (u0[i, j+1]['Temp'] - 2*u0[i, j]['Temp'] + u0[i, j-1]['Temp']) / dy2
-                u[i, j]['Temp'] = u0[i, j]['Temp'] + dt * D * (uxx + uyy)
+                # This cell is ice, we increase the temperature and verify it
+                # now isn't above the sublimation temperature.
+                uxx = (
+                    u0[i+1, j]['Temp']
+                    - 2*u0[i, j]['Temp']
+                    + u0[i-1, j]['Temp']
+                    ) / dx2
+                uyy = (
+                    u0[i, j+1]['Temp']
+                    - 2*u0[i, j]['Temp']
+                    + u0[i, j-1]['Temp']
+                    ) / dy2
+                u[i, j]['Temp'] = u0[i, j]['Temp'] + D * (uxx + uyy)
                 if u[i, j]['Temp'] >= Tmelt:
                     u0[i, j]['StateChange'] = True
                     # u[i, j]['Temp'] = Tmelt
