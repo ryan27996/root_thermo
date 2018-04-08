@@ -122,7 +122,7 @@ def do_timestep(u0, u):
 
 # TODO: Separate lib with main
 # plate size, mm
-w = h = 500.
+w = h = 300.
 # intervals in x-, y- directions, mm
 dx = dy = 1
 # Thermal diffusivity of steel, mm2.s-1
@@ -180,7 +180,7 @@ circle2 = plt.Circle(
     (w/2, h/2), r*dx,
     color='r', linestyle='dashed', fill=False, linewidth=2.0)
 ax = plt.gca()
-ax.add_artist(circle2)
+# ax.add_artist(circle2)
 cp1 = plt.contourf(X, Y, u0['Temp'].copy(), 20)
 
 plt.title(
