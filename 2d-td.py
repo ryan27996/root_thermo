@@ -106,24 +106,23 @@ def do_timestep(u0, u):
                     # We are undergoing a state change now
                     # print("State Change started at {}, {}".format(i, j))
                     u[i, j]['StateChange'] = True
-                    u[i, j]['Temp'] = Tmelt
 
     for i in range(nx):
         for j in range(ny):
             p2 = (i*dx-cx)**2 + (j*dy-cy)**2
             if p2 < r2:
-                u[i+hrr, j]['Temp'] = Thot
-                u[i-hrr, j]['Temp'] = Thot
-                u[i, j+hrr]['Temp'] = Thot
-                u[i, j-hrr]['Temp'] = Thot
-                # u[i, j]['Temp'] = Thot
+                # u[i+hrr, j]['Temp'] = Thot
+                # u[i-hrr, j]['Temp'] = Thot
+                # u[i, j+hrr]['Temp'] = Thot
+                # u[i, j-hrr]['Temp'] = Thot
+                u[i, j]['Temp'] = Thot
     u0 = u.copy()
     return u0, u
 
 
 # TODO: Separate lib with main
 # plate size, mm
-w = h = 500.
+w = h = 300.
 # intervals in x-, y- directions, mm
 dx = dy = 1
 # Thermal diffusivity of steel, mm2.s-1
@@ -165,11 +164,11 @@ for i in range(nx):
     for j in range(ny):
         p2 = (i*dx-cx)**2 + (j*dy-cy)**2
         if p2 < r2:
-            u0[i+hrr, j]['Temp'] = Thot
-            u0[i-hrr, j]['Temp'] = Thot
-            u0[i, j+hrr]['Temp'] = Thot
-            u0[i, j-hrr]['Temp'] = Thot
-            # u0[i, j]['Temp'] = Thot
+            # u0[i+hrr, j]['Temp'] = Thot
+            # u0[i-hrr, j]['Temp'] = Thot
+            # u0[i, j+hrr]['Temp'] = Thot
+            # u0[i, j-hrr]['Temp'] = Thot
+            u0[i, j]['Temp'] = Thot
 
 # TODO: Make this printing a function call
 r = getMeltRadius(u0, Tmelt)  # Array, Melt_temp
@@ -181,11 +180,11 @@ circle2 = plt.Circle(
     (w/2, h/2), r*dx,
     color='r', linestyle='dashed', fill=False, linewidth=2.0)
 ax = plt.gca()
-ax.add_artist(circle2)
+# ax.add_artist(circle2)
 cp1 = plt.contourf(X, Y, u0['Temp'].copy(), 20)
 
 plt.title(
-    'Contour Plot of Tempeture in ice' +
+    'Contour Plot of Temperature in ice' +
     'after t = {0}{1} and r = {2}{3}'.format(
                 int(0), "s",        int(r*dx), "mm"))
 plt.xlabel('x (mm)')
@@ -222,7 +221,7 @@ while t <= nsteps:
         cp1 = plt.contourf(X, Y, u['Temp'].copy(), 20)
 
         plt.title(
-            'Contour Plot of Tempeture in ice' +
+            'Contour Plot of Temperature in ice' +
             'after t = {0}{1} and r = {2}{3}'.format(
                         int(t*dt), "s",        int(r*dx), "mm"))
         plt.xlabel('x (mm)')
