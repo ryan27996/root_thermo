@@ -86,7 +86,7 @@ def test_circler():
 
 
 def lim_cir(r, center_x, center_y):
-    circle2 = plt.Circle((center_x, center_y), r, color='r', fill=False, linewidth = 2.0)
+    circle2 = plt.Circle((center_x, center_y), r, color='r', fill=False, linewidth = 2.0, linestyle='dashed')
     ax = plt.gca()
     ax.add_artist(circle2)
 
@@ -121,7 +121,7 @@ def getMeltRadius(array, length, melt_temp):
 
 
 #  Example
-#   ./grid_thermo.py -l 100 -m 0 -i -40 -c 500 -r 1.6 -n 1000
+#   ./2d-ss.py  -l 500 -m 10 -i -40 -c 500 -r 1.6 -n 1000
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--length", "-l", type=int, required=True)
@@ -191,7 +191,7 @@ while t <= ITERATIONS:
     t += 1
     # print t
 
-    if (t % 10) == 0:
+    if (t % 100) == 0:
         # print(t, T, sep=",")
         r = getMeltRadius(T, length, T_MELT)  # Array, Length, Melt_temp
         f = "out-"
@@ -208,7 +208,7 @@ while t <= ITERATIONS:
         y = np.arange(0, height, delta)
         X, Y = np.meshgrid(x, y)
         fig2 = plt.figure()
-        circle2 = plt.Circle((length/2.0, height/2.0), r, color='r', fill=False, linewidth = 2.0)
+        circle2 = plt.Circle((length/2.0, height/2.0), r, color='r', fill=False, linewidth = 2.0, linestyle='dashed')
         ax = plt.gca()
         ax.add_artist(circle2)
         cp1 = plt.contourf(X, Y, T, 20)
@@ -251,80 +251,3 @@ while t <= ITERATIONS:
 # plt.colorbar(cp1)
 # # plt.legend()
 # plt.savefig('thermo.png')
-'''
-class cell():
-    def __init__(self, temp, energy, k, statechanging=False):
-        self.t = temp
-        self.e = energy
-        self.k = k
-        self.sc = bool(statechanging)
-
-    def increaseTemp(temp):
-
-
-
-from matplotlib.animation import FuncAnimation
-
-class coffee():
-    keeps track of number of particles and their location
-    def __init__(self,numberOfParticles,xmin=-100,xmax=100,ymin=-100,ymax=100):
-        self.nParticles = numberOfParticles
-        self.x = np.zeros(numberOfParticles)
-        self.y = np.zeros(numberOfParticles)
-        self.xrange = [xmin,xmax]
-        self.yrange = [ymin,ymax]
-
-    def updatePostion(self):
-        for i in np.arange(self.nParticles):
-            self.x[i] = self.x[i] + random.uniform(-5,5)
-            self.y[i] = self.y[i] + random.uniform(-5,5)
-
-            if self.x[i] > self.xrange[1]:
-                self.x[i] = self.xrange[1]
-            if self.x[i] < self.xrange[0]:
-                self.x[i] = self.xrange[0]
-            if self.y[i] > self.yrange[1]:
-                self.y[i] = self.yrange[1]
-            if self.y[i] < self.yrange[0]:
-                self.y[i] = self.yrange[0]
-
-
-    # def plotDistribution(self):
-    #     plt.scatter(self.x,self.y)
-    #     plt.xlim(-100,100)
-    #     plt.ylim(-100,100)
-    #     plt.xlabel('x')
-    #     plt.ylabel('y')
-    #     plt.show()
-
-    def initFigure(self):
-        self.fig = plt.figure()
-        plt.xlim(-100,100)
-        plt.ylim(-100,100)
-        plt.xlabel('x')
-        plt.ylabel('y')
-        self.scat = plt.scatter(self.x,self.y,s=20)
-
-    def update(self,i):
-        self.updatePostion()
-        self.scat.set_offsets(np.c_[self.x,self.y])
-
-
-
-nParticles = 500
-newCup = coffee(nParticles)
-
-
-# t = 0
-# t_max = 60
-# while t < t_max:
-#     newCup.updatePostion()
-#     t += 1
-#     if t % 100 == 0:
-#         print t
-
-
-newCup.initFigure()
-anim = FuncAnimation(newCup.fig,newCup.update,interval=1,frames=10000,repeat = False) #fig is a figure, update is a function
-plt.show()
-'''
