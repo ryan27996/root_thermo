@@ -76,13 +76,14 @@ def do_timestep(u0, u):
             myT = u0[i, j]['Temp']         # This should minimize array lookups
             myS = u0[i, j]['StateChange']  #
             myE = u0[i, j]['Energy']       #
-            # print("{}, {}: T={} S={} E={}".format(i, j, myT, myS, myE))
+            # print("{}, {}: T={} S={} E={}".format(i, j, myT, myS, myE))\
+            Tru_count = np.sum(u['StateChange'])
             if myS:
                 # print("{}, {}: T={} S={} E={}".format(i, j, myT, myS, myE))
                 # This means the cell is undergoing a state change.
                 # Add energy to cell
                 # TODO: Find an actual value for this
-                Energy_new = EnergyMeltCell/2
+                Energy_new = Sams_Energy/dt/int(Tru_count)
                 u[i, j]['Energy'] = myE + Energy_new
                 # print("State Change in progress at {}, {}".format(i, j))
                 if u[i, j]['Energy'] >= EnergyMeltCell:
@@ -132,6 +133,8 @@ vCell = w**3                         # Volume of a cell [mm^3]
 mCell = pice * vCell                 # Mass of Cell of ice [kg]
 EIce2Vapor = 2543.0                  # [kJ/kg] at 0C
 EnergyMeltCell = EIce2Vapor * mCell  # Energy to melt a cell of ice [kJ]
+Sams_Energy =  119320.898928 #kJ/s
+
 Tcool, Thot = -20, 500
 Tmelt = 10.0
 
@@ -206,8 +209,8 @@ while t <= nsteps:
     t += 1
     # print(t)
 
-    if (t % 101) == 0:
-    # if True:
+    # if (t % 11) == 0:
+    if True:
         r = getMeltRadius(u, Tmelt)  # Array, Melt_temp
         x = np.arange(0, w, dx)
         y = np.arange(0, h, dy)
